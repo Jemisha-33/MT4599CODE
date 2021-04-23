@@ -34,7 +34,7 @@ def plotinfec(t, U1, U2, U3, U4, U5, L=None):
     plt.rcParams["font.size"] = 13
     f, ax = plt.subplots(1, 1, figsize=(10, 4))
     ax.plot(t, U1, 'r', alpha=0.7, linewidth=2, label='Active, Compartment 1')
-    ax.plot(t, U2, 'm', alpha=0.7, linewidth=2, label='Susceptible, Compartment 1')
+    ax.plot(t, U2, 'm', alpha=0.7, linewidth=2, label='Active, Compartment 1')
 
     if U3 is not None:
         ax.plot(t, U3, 'c', alpha=0.7, linewidth=2, label='Active, Compartment 2')
@@ -68,15 +68,13 @@ w01, w02, w03, w04 = 0, 0, 0, 0
 w10, w12, w13, w14 = 10e-4, 0, 0, 0
 w20, w21, w23, w24= 0, 0, 0, 0
 w30, w31, w32, w34 = 0, 0, 0, 0
-w40, w41, w42, w43 = 0, 0, 0, 0
-
 
 # Matrix with the interaction terms
 
-w = np.array([[0, w12, w13, w14],
-              [w21, 0, w23, w24],
-              [w31, w32, 0, w34],
-              [w41, w42, w43, 0]])
+w = np.array([[0, w01, w02, w03],
+              [w10, 0, w12, w13],
+              [w20, w21, 0, w23],
+              [w30, w31, w32, 0]])
 
 # Define function with system of ODES consisting of the SIR equations
 # S denotes number of susceptible individuals
@@ -96,8 +94,8 @@ def fnc1(y, t, beta, gamma, delta, w, tau):
     dU1dt = beta * S1 * U1 - gamma * U1
     dR1dt = gamma * U1 - delta * R1
 
-    dS2dt = - beta * S2 * U2 + delta * R2
-    dU2dt = beta * S2 * U2 - gamma * U2
+    dS2dt = - 0.01 * S2 * U2 + delta * R2
+    dU2dt = 0.01 * S2 * U2 - gamma * U2
     dR2dt = gamma * U2 - delta * R2
 
     dS3dt = -beta * S3 * U3 + delta * R3
@@ -145,7 +143,7 @@ Y0 = np.array([S1, U1, R1, S2, U2, R2, S3, U3, R3, S4, U4, R4])
 t = np.linspace(0, 60, 100)
 
 # Time delay parameter
-tau = 0
+tau = 5
 
 sol = odeint(fnc1, Y0, t, args=(beta, gamma, delta, w, tau))
 
@@ -162,4 +160,9 @@ Active_3 = sol[:, 7]
 Recovered_3 = sol[:, 8]
 
 # Example plot of solutions
-plotinfec(t, Active_1, Susceptible_1, Active_2, Recovered_2, None)
+
+plotinfec(t, Active_1, Active_2, None, None, None)
+
+plotinfec(t, Susceptible_1, Susceptible_2, None, None, None)
+plotinfec(t, Active_1, Active_2, None, None, None)
+
