@@ -34,14 +34,14 @@ def plotinfec(t, U1, U2, U3, U4, U5, L=None):
     plt.rcParams["font.size"] = 13
     f, ax = plt.subplots(1, 1, figsize=(10, 4))
     ax.plot(t, U1, 'r', alpha=0.7, linewidth=2, label='Active, Compartment 1')
-    ax.plot(t, U2, 'm', alpha=0.7, linewidth=2, label='Active, Compartment 2')
+    ax.plot(t, U2, 'm', alpha=0.7, linewidth=2, label='Susceptible, Compartment 1')
 
     if U3 is not None:
-        ax.plot(t, U3, 'c', alpha=0.7, linewidth=2, label='Active, Compartment 3')
+        ax.plot(t, U3, 'c', alpha=0.7, linewidth=2, label='Active, Compartment 2')
     if U4 is not None:
-        ax.plot(t, U4, 'y', alpha=0.7, linewidth=2, label='Active, Compartment 4')
+        ax.plot(t, U4, 'y', alpha=0.7, linewidth=2, label='Recovered, Compartment 2')
     if U5 is not None:
-        ax.plot(t, U5, 'b', alpha=0.7, linewidth=2, label='Active, Compartment 5')
+        ax.plot(t, U5, 'b', alpha=0.7, linewidth=2, label='Active, Compartment 3')
 
     hfont = {'fontname': 'Baskerville',
              'size': 14,
@@ -61,33 +61,32 @@ def plotinfec(t, U1, U2, U3, U4, U5, L=None):
     plt.show();
 
 # Define matrix of compartment connections
-# Eventually the model will be extended to nine compartments which is why W is 9x9
+# the elements of this matrix represent the non-local influence on the unrest
+# Eventually the model will be extended to nine compartments where W will be a 9x9 matrix.
 
-w01, w02, w03, w04, w05, w06, w07, w08 = 0, 0, 0, 0, 0, 0, 0, 0
-w10, w12, w13, w14, w15, w16, w17, w18 = 10e-4, 0, 0, 0, 0, 0, 0, 0
-w20, w21, w23, w24, w25, w26, w27, w28 = 0, 0, 0, 0, 0, 0, 0, 0
-w30, w31, w32, w34, w35, w36, w37, w38 = 0, 0, 0, 0, 0, 0, 0, 0
-w40, w41, w42, w43, w45, w46, w47, w48 = 0, 0, 0, 0, 0, 0, 0, 0
-w50, w51, w52, w53, w54, w56, w57, w58 = 0, 0, 0, 0, 0, 0, 0, 0
-w60, w61, w62, w63, w64, w65, w67, w68 = 0, 0, 0, 0, 0, 0, 0, 0
-w70, w71, w72, w73, w74, w75, w76, w78 = 0, 0, 0, 0, 0, 0, 0, 0
-w80, w81, w82, w83, w84, w85, w86, w87 = 0, 0, 0, 0, 0, 0, 0, 0
+w01, w02, w03, w04 = 0, 0, 0, 0
+w10, w12, w13, w14 = 10e-4, 0, 0, 0
+w20, w21, w23, w24= 0, 0, 0, 0
+w30, w31, w32, w34 = 0, 0, 0, 0
+w40, w41, w42, w43 = 0, 0, 0, 0
+
 
 # Matrix with the interaction terms
 
-w = np.array([[0, w01, w02, w03, w04, w05, w06, w07, w08],
-              [w10, 0, w12, w13, w14, w15, w16, w17, w18],
-              [w20, w21, 0, w23, w24, w25, w26, w27, w28],
-              [w30, w31, w32, 0, w34, w35, w36, w37, w38],
-              [w40, w41, w42, w43, 0, w45, w46, w47, w48],
-              [w50, w51, w52, w53, w54, 0, w56, w57, w58],
-              [w60, w61, w62, w63, w64, w65, 0, w67, w68],
-              [w70, w71, w72, w73, w74, w75, w76, 0, w78],
-              [w80, w81, w82, w83, w84, w85, w86, w87, 0]])
+w = np.array([[0, w12, w13, w14],
+              [w21, 0, w23, w24],
+              [w31, w32, 0, w34],
+              [w41, w42, w43, 0]])
 
-# Define function with SIR equations
+# Define function with system of ODES consisting of the SIR equations
+# S denotes number of susceptible individuals
+# U (previously 'I') denotes the no of individuals active in unrest
+# R denotes the individuals who have 'recovered'.
+
+# y is a vectors containing the S,U and R variables.
 
 def fnc1(y, t, beta, gamma, delta, w, tau):
+
     S1, U1, R1, S2, U2, R2, S3, U3, R3, S4, U4, R4 = y
 
     S = np.array([S1, S2, S3, S4])
@@ -162,5 +161,5 @@ Susceptible_3 = sol[:, 6]
 Active_3 = sol[:, 7]
 Recovered_3 = sol[:, 8]
 
-# Plot solutions
+# Example plot of solutions
 plotinfec(t, Active_1, Susceptible_1, Active_2, Recovered_2, None)
